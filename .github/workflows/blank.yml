@@ -7,6 +7,10 @@ on:
     types:
       - closed
 
+
+permissions:
+  contents: write
+
 jobs:
   create-staging-release-tag:
     # Only run if the PR was merged and originated from dev branch
