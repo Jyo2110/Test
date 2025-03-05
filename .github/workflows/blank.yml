@@ -7,10 +7,6 @@ on:
     types:
       - closed
 
-permissions:
-  contents: write
-  pull-requests: read
-
 jobs:
   create-staging-release-tag:
     # Only run if the PR was merged and originated from dev branch
@@ -31,40 +27,19 @@ jobs:
       shell: bash
       run: |
         # Generate tag with staging prefix and timestamp
-        TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+        TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
         TAG="staging-release-${TIMESTAMP}"
         
         echo "tag=${TAG}" >> $GITHUB_OUTPUT
         echo "Generated staging release tag: ${TAG}"
     
     - name: Create Staging Release Tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # Configure git user for tagging
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
         # Create and push annotated tag
-        git tag -a ${{ steps.generate_tag.outputs.tag }} -m "Staging Release $(date +'%Y-%m-%d %H:%M:%S')"
+        git tag -a ${{ steps.generate_tag.outputs.tag }} -m "Staging Release ${{ steps.generate_tag.outputs.tag }}"
         git push origin ${{ steps.generate_tag.outputs.tag }}
-    
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.generate_tag.outputs.tag }}
-        release_name: Staging Release ${{ steps.generate_tag.outputs.tag }}
-        body: |
-          ## Staging Release
-          - Automated staging release from dev branch
-          
-          ### Merge Details
-          - Merged by: ${{ github.event.pull_request.user.login }}
-          - Merged at: ${{ github.event.pull_request.merged_at }}
-          - Source Branch: ${{ github.event.pull_request.head.ref }}
-          - Target Branch: ${{ github.event.pull_request.base.ref }}
-        draft: false
-        prerelease: true
 
