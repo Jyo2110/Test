@@ -1,36 +1,65 @@
-# This is a basic workflow to help you get started with Actions
+name: Create Release Tag
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    types:
+      - closed
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  create-release-tag:
+    # Only run if the PR was merged
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Extract version from PR title
+      id: get_version
+      run: |
+        # Extract version from PR title using a regex pattern
+        # Assumes PR title follows semantic versioning format like "release: v1.2.3"
+        VERSION=$(echo "${{ github.event.pull_request.title }}" | grep -oP 'v\d+\.\d+\.\d+')
+        
+        if [ -z "$VERSION" ]; then
+          echo "No version found in PR title. Skipping release tag creation."
+          exit 1
+        fi
+        
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+    
+    - name: Create Release Tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create an annotated tag
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        
+        git tag -a ${{ steps.get_version.outputs.version }} \
+          -m "Release ${{ steps.get_version.outputs.version }}"
+        
+        # Push the tag to the repository
+        git push origin ${{ steps.get_version.outputs.version }}
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        release_name: Release ${{ steps.get_version.outputs.version }}
+        body: |
+          ## Changes
+          - Automated release created from merged PR
+          
+          ### Pull Request Details
+          - Merged by: ${{ github.event.pull_request.user.login }}
+          - Merged at: ${{ github.event.pull_request.merged_at }}
+        draft: false
+        prerelease: false
