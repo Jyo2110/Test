@@ -7,6 +7,10 @@ on:
     types:
       - closed
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   create-release-tag:
     # Only run if the PR was merged
@@ -21,30 +25,34 @@ jobs:
     
     - name: Extract version from PR title
       id: get_version
+      shell: bash
       run: |
-        # Extract version from PR title using a regex pattern
-        # Assumes PR title follows semantic versioning format like "release: v1.2.3"
-        VERSION=$(echo "${{ github.event.pull_request.title }}" | grep -oP 'v\d+\.\d+\.\d+')
+        # More robust version extraction
+        VERSION=$(echo "${{ github.event.pull_request.title }}" | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' || echo "")
         
         if [ -z "$VERSION" ]; then
-          echo "No version found in PR title. Skipping release tag creation."
+          echo "::error::No version found in PR title. Please use format 'v1.2.3' or '1.2.3'"
           exit 1
         fi
         
+        # Ensure version starts with 'v'
+        if [[ ! "$VERSION" == v* ]]; then
+          VERSION="v$VERSION"
+        fi
+        
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Extracted version: ${VERSION}"
     
     - name: Create Release Tag
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Create an annotated tag
-        git config user.name github-actions
-        git config user.email github-actions@github.com
+        # Configure git user for tagging
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
-        git tag -a ${{ steps.get_version.outputs.version }} \
-          -m "Release ${{ steps.get_version.outputs.version }}"
-        
-        # Push the tag to the repository
+        # Create and push annotated tag
+        git tag -a ${{ steps.get_version.outputs.version }} -m "Release ${{ steps.get_version.outputs.version }}"
         git push origin ${{ steps.get_version.outputs.version }}
     
     - name: Create GitHub Release
@@ -63,3 +71,4 @@ jobs:
           - Merged at: ${{ github.event.pull_request.merged_at }}
         draft: false
         prerelease: false
+
