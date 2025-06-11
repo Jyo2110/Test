@@ -74,8 +74,12 @@ jobs:
         NEW_TAG="v$MAJOR.$MINOR.$PATCH"
         echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
+        BUILD_TAG="${NEW_TAG}-$(date +%Y-%m-%d-%H-%M-%S)"
+        echo "build_tag=$BUILD_TAG" >> $GITHUB_OUTPUT
+        echo "Full build tag: ${{ steps.calc_version.outputs.build_tag }}"
+        
     - name: Create and Push Tags
       if: steps.check_merge.outputs.merged == 'true'
       run: |
-        git tag -a ${{ steps.calc_version.outputs.version }}  -m "Release ${{ steps.calc_version.outputs.version }}"
-        git push origin ${{ steps.calc_version.outputs.version }}
+        git tag  ${{ steps.calc_version.outputs.version.build_tag }}  
+        git push origin ${{ steps.calc_version.outputs.version.build_tag }}
