@@ -1,4 +1,5 @@
-name: Auto Version Tag on Merge 
+
+name: Auto Version Tag on Merge
 
 on:
   push:
