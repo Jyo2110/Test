@@ -71,7 +71,7 @@ jobs:
           NEW_TAG="v$MAJOR.$MINOR.$PATCH"
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
  
-      - name: Create and push tag
+      - name: Create and push tags
         run: |
           git tag ${{ steps.new_tag.outputs.new_tag }}
           git push origin ${{ steps.new_tag.outputs.new_tag }}
