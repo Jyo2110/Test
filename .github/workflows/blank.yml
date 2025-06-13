@@ -22,7 +22,7 @@ jobs:
       with:
         fetch-depth: 0
     
-    - name: Generate Staging Release Tag
+    - name: Generate Staging Release Tags
       id: generate_tag
       shell: bash
       run: |
