@@ -3,6 +3,8 @@ name: Auto Version Tag on Merge from Stage to Master
 on:
   push:
     branches:
+    - dev
+    - stage
     - master
 
 jobs:
@@ -20,10 +22,10 @@ jobs:
         git config --global user.name "${{ github.actor }}"
         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-    - name: Check if merged from stage
+    - name: Check if merged from dev
       id: check_merge
       run: |
-        if git log -1 --pretty=%B | grep -i 'merge.*stage'; then
+        if git log -1 --pretty=%B | grep -i 'merge.*dev'; then
           echo "merged=true" >> $GITHUB_OUTPUT
         else
           echo "merged=false" >> $GITHUB_OUTPUT
