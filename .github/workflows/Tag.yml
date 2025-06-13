@@ -1,83 +1,83 @@
 
-name: Auto Version Tag on Merge
+# name: Auto Version Tag on Merge
 
-on:
-  push:
-    branches:
-    - dev
-jobs:
-  auto-version-tag:
-    runs-on: ubuntu-latest
+# on:
+#   push:
+#     branches:
+#     - dev
+# jobs:
+#   auto-version-tag:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+#     steps:
+#     - name: Checkout Code
+#       uses: actions/checkout@v4
+#       with:
+#         fetch-depth: 0
 
-    - name: Set up Git
-      run: |
-        git config --global user.name "${{ github.actor }}"
-        git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+#     - name: Set up Git
+#       run: |
+#         git config --global user.name "${{ github.actor }}"
+#         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-    - name: Check if merged from dev
-      id: check_merge
-      run: |
-        if git log -1 --pretty=%B | grep -i 'merge.*dev'; then
-          echo "merged=true" >> $GITHUB_OUTPUT
-        else
-          echo "merged=false" >> $GITHUB_OUTPUT
-        fi
+#     - name: Check if merged from dev
+#       id: check_merge
+#       run: |
+#         if git log -1 --pretty=%B | grep -i 'merge.*dev'; then
+#           echo "merged=true" >> $GITHUB_OUTPUT
+#         else
+#           echo "merged=false" >> $GITHUB_OUTPUT
+#         fi
 
-    - name: Get Release Type (default = patch)
-      id: get_release_type
-      if: steps.check_merge.outputs.merged == 'true'
-      run: |
-        COMMIT_MSG=$(git log -1 --pretty=%B | tr '[:upper:]' '[:lower:]')
-        if echo "$COMMIT_MSG" | grep -q 'release:major'; then
-          echo "release_type=major" >> $GITHUB_OUTPUT
-        elif echo "$COMMIT_MSG" | grep -q 'release:minor'; then
-          echo "release_type=minor" >> $GITHUB_OUTPUT
-        else
-          echo "release_type=patch" >> $GITHUB_OUTPUT
-        fi
+#     - name: Get Release Type (default = patch)
+#       id: get_release_type
+#       if: steps.check_merge.outputs.merged == 'true'
+#       run: |
+#         COMMIT_MSG=$(git log -1 --pretty=%B | tr '[:upper:]' '[:lower:]')
+#         if echo "$COMMIT_MSG" | grep -q 'release:major'; then
+#           echo "release_type=major" >> $GITHUB_OUTPUT
+#         elif echo "$COMMIT_MSG" | grep -q 'release:minor'; then
+#           echo "release_type=minor" >> $GITHUB_OUTPUT
+#         else
+#           echo "release_type=patch" >> $GITHUB_OUTPUT
+#         fi
 
-    - name: Get Latest Tag
-      id: get_latest_tag
-      if: steps.check_merge.outputs.merged == 'true'
-      run: |
-        TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
+#     - name: Get Latest Tag
+#       id: get_latest_tag
+#       if: steps.check_merge.outputs.merged == 'true'
+#       run: |
+#         TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
+#         echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-    - name: Calculate New Version
-      id: calc_version
-      if: steps.check_merge.outputs.merged == 'true'
-      run: |
-        OLD_TAG=${{ steps.get_latest_tag.outputs.tag }}
-        IFS='.' read -r MAJOR MINOR PATCH <<< "${OLD_TAG#v}"
+#     - name: Calculate New Version
+#       id: calc_version
+#       if: steps.check_merge.outputs.merged == 'true'
+#       run: |
+#         OLD_TAG=${{ steps.get_latest_tag.outputs.tag }}
+#         IFS='.' read -r MAJOR MINOR PATCH <<< "${OLD_TAG#v}"
 
-        case "${{ steps.get_release_type.outputs.release_type }}" in
-          major)
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-            ;;
-          minor)
-            MINOR=$((MINOR + 1))
-            PATCH=0
-            ;;
-          patch)
-            PATCH=$((PATCH + 1))
-            ;;
-        esac
+#         case "${{ steps.get_release_type.outputs.release_type }}" in
+#           major)
+#             MAJOR=$((MAJOR + 1))
+#             MINOR=0
+#             PATCH=0
+#             ;;
+#           minor)
+#             MINOR=$((MINOR + 1))
+#             PATCH=0
+#             ;;
+#           patch)
+#             PATCH=$((PATCH + 1))
+#             ;;
+#         esac
 
-        NEW_TAG="v$MAJOR.$MINOR.$PATCH"
-        NEW_TAG="${NEW_TAG//../.}"
-        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+#         NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+#         NEW_TAG="${NEW_TAG//../.}"
+#         echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
         
-    - name: Create and Push Tag
-      if: steps.check_merge.outputs.merged == 'true'
-      run: | 
-        git tag ${{ steps.calc_version.outputs.new_tag }}
-        git push origin ${{ steps.calc_version.outputs.new_tag }}
+#     - name: Create and Push Tag
+#       if: steps.check_merge.outputs.merged == 'true'
+#       run: | 
+#         git tag ${{ steps.calc_version.outputs.new_tag }}
+#         git push origin ${{ steps.calc_version.outputs.new_tag }}
         
