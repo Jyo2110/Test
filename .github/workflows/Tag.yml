@@ -1,83 +1,73 @@
-name: Auto Version Tag on Merge from Stage to Master
-
+name: Auto Version Tag from PR Label
+ 
 on:
-  push:
-    branches:
-    - master
-
+  pull_request:
+    types: [closed]
+ 
 jobs:
-  auto-version-tag:
+  auto-tag:
+    if: github.event.pull_request.merged == true &&
+        github.event.pull_request.base.ref == 'master' &&
+        github.event.pull_request.head.ref == 'stage'
     runs-on: ubuntu-latest
-
+ 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up Git
-      run: |
-        git config --global user.name "${{ github.actor }}"
-        git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-
-    - name: Check if merged from stage
-      id: check_merge
-      run: |
-        if git log -1 --pretty=%B | grep -i 'merge.*stage'; then
-          echo "merged=true" >> $GITHUB_OUTPUT
-        else
-          echo "merged=false" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Get Release Type (default = patch)
-      id: get_release_type
-      if: steps.check_merge.outputs.merged == 'true'
-      run: |
-        COMMIT_MSG=$(git log -1 --pretty=%B | tr '[:upper:]' '[:lower:]')
-        if echo "$COMMIT_MSG" | grep -q 'release:major'; then
-          echo "release_type=major" >> $GITHUB_OUTPUT
-        elif echo "$COMMIT_MSG" | grep -q 'release:minor'; then
-          echo "release_type=minor" >> $GITHUB_OUTPUT
-        else
-          echo "release_type=patch" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Get Latest Tag
-      id: get_latest_tag
-      if: steps.check_merge.outputs.merged == 'true'
-      run: |
-        TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-    - name: Calculate New Version
-      id: calc_version
-      if: steps.check_merge.outputs.merged == 'true'
-      run: |
-        OLD_TAG=${{ steps.get_latest_tag.outputs.tag }}
-        IFS='.' read -r MAJOR MINOR PATCH <<< "${OLD_TAG#v}"
-
-        case "${{ steps.get_release_type.outputs.release_type }}" in
-          major)
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-            ;;
-          minor)
-            MINOR=$((MINOR + 1))
-            PATCH=0
-            ;;
-          patch)
-            PATCH=$((PATCH + 1))
-            ;;
-        esac
-
-        NEW_TAG="v$MAJOR.$MINOR.$PATCH"
-        NEW_TAG="${NEW_TAG//../.}"
-        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
-        
-    - name: Create and Push Tags
-      if: steps.check_merge.outputs.merged == 'true'
-      run: | 
-        git tag ${{ steps.calc_version.outputs.new_tag }}
-        git push origin ${{ steps.calc_version.outputs.new_tag }}
-        
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Set up Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+ 
+      - name: Get release type from PR labels
+        id: release_type
+        run: |
+          LABELS=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
+          RELEASE_TYPE="patch"
+          for label in $LABELS; do
+            case "$label" in
+              release:major) RELEASE_TYPE="major" ;;
+              release:minor) RELEASE_TYPE="minor" ;;
+              release:patch) RELEASE_TYPE="patch" ;;
+            esac
+          done
+          echo "Release type: $RELEASE_TYPE"
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+ 
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+ 
+      - name: Calculate new tag
+        id: new_tag
+        run: |
+          OLD_TAG=${{ steps.get_tag.outputs.tag }}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${OLD_TAG#v}"
+ 
+          case "${{ steps.release_type.outputs.release_type }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+ 
+          NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+ 
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.new_tag.outputs.new_tag }}
+          git push origin ${{ steps.new_tag.outputs.new_tag }}
