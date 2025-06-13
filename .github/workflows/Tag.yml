@@ -1,4 +1,4 @@
-name: Auto Version Tag on Merge from Stage to Master
+name: Auto Version Tag on Merge
 
 on:
   push:
