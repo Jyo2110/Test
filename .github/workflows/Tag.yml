@@ -1,12 +1,10 @@
+
 name: Auto Version Tag on Merge
 
 on:
   push:
     branches:
     - dev
-    - stage
-    - master
-
 jobs:
   auto-version-tag:
     runs-on: ubuntu-latest
