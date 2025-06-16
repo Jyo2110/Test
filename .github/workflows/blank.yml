@@ -1,11 +1,13 @@
 name: Create Staging Release Tag
 
-on:
-  pull_request:
-    branches:
-      - staging
-    types:
-      - closed
+on: push 
+
+# on:
+#   pull_request:
+#     branches:
+#       - staging
+#     types:
+#       - closed
 
 permissions:
   contents: write
@@ -13,10 +15,10 @@ permissions:
 jobs:
   create-staging-release-tag:
     # Only run if the PR was merged and originated from dev branch
-    if: >
-      github.event.pull_request.merged == true && 
-      github.event.pull_request.base.ref == 'staging' && 
-      github.event.pull_request.head.ref == 'dev'
+    # if: >
+    #   github.event.pull_request.merged == true && 
+    #   github.event.pull_request.base.ref == 'staging' && 
+    #   github.event.pull_request.head.ref == 'dev'
     runs-on: ubuntu-latest
     
     steps:
