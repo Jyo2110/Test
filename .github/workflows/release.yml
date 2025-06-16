@@ -1,7 +1,7 @@
-name: Create GitHub Release
+name: Versioning and Create GitHub Release
 
 on: push
- 
+  
 
 jobs:
   create-release:
@@ -15,22 +15,23 @@ jobs:
       # Step 2: Set up Git user for tagging
       - name: Configure Git
         run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      # Step 3: Get the current version tag
+      # Step 3: Get the current version
       - name: Get current version
         id: get_version
         run: |
-          # Get the latest git tag
-          TAG=$(git describe --tags --abbrev=0)
-          echo "Current tag: $TAG"
-          
+          # Get the latest git tag (or set default if no tags exist)
+          TAG=$(git tag -l | sort -V | tail -n 1)  # List tags, sort them, and get the latest one
+
           # If no tags exist, set initial version to v0.1.0
           if [ -z "$TAG" ]; then
             TAG="v0.1.0"
           fi
-          
+
+          echo "Current tag: $TAG"
+
           # Extract the version numbers (major.minor.patch)
           VERSION=${TAG#v}
           IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
@@ -52,10 +53,10 @@ jobs:
       - name: Create new tag
         run: |
           # Create a new Git tag
-          git tag -a ${{ env.new_version }} -m "Release ${{ env.new_version }}"
+          git tag -a "${{ env.new_version }}" -m "Release ${{ env.new_version }}"
           
           # Push the tag to GitHub
-          git push origin ${{ env.new_version }}
+          git push origin "${{ env.new_version }}"
 
       # Step 5: Create GitHub release with the new tag
       - name: Create GitHub Release
@@ -64,14 +65,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.new_version }}
-          release_name: Release ${{ env.new_version }}
+          tag_name: ${{ env.new_version }}  # Use the new version tag from the environment
+          release_name: Release ${{ env.new_version }}  # Use the new version in the release name
           body: |
             ## Changes in this Release
             - Updated version to ${{ env.new_version }}
             - Automatic version increment and release generation.
           draft: false
           prerelease: false
-
-   
-
