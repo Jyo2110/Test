@@ -73,3 +73,8 @@ jobs:
             - Automatic version increment and release generation.
           draft: false
           prerelease: false
+
+      - name: Add release tag to summary
+        run: |
+           echo "### 🔖 Release Tag" >> $GITHUB_STEP_SUMMARY
+           echo "${{ steps.get_tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY         
