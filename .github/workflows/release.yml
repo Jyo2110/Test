@@ -19,7 +19,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       # Step 3: Get the current version
-      - name: Get current version
+      - name: Get current versions
         id: get_version
         run: |
           # Get the latest git tag (or set default if no tags exist)
