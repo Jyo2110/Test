@@ -80,5 +80,10 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: 📢 Show version in Actions log
+        run: |
+           echo "📦 Version: ${{ env.new_version }} (${{ steps.release_type.outputs.release_type }} release)"
+    
+
 
             
