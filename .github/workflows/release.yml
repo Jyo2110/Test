@@ -6,6 +6,7 @@ on:
 
 jobs:
   create-release:
+    name: Release – ${{ env.new_version }} (${{ steps.release_type.outputs.release_type }} release)
     # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
