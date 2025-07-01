@@ -37,7 +37,7 @@ jobs:
         id: get_version
         run: |
           TAG=$(git tag -l | sort -V | tail -n 1)
-          if [ -z "$TAG" ]; then TAG="v0.0.0"; fi
+          if [ -z "$TAG" ]; then TAG="v0.2.0"; fi
 
           VERSION=${TAG#v}
           IFS='.' read -r -a PARTS <<< "$VERSION"
