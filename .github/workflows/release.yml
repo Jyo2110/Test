@@ -1,8 +1,11 @@
-name: Versioning and Create GitHub Release
+name: Release ${{ env.new_version }} (${{ steps.release_type.outputs.release_type }} release)
 
+on: push
+ 
 on:
   pull_request:
     types: [opened, labeled, synchronize] 
+
 
 jobs:
   create-release:
