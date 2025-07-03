@@ -85,13 +85,18 @@ jobs:
 
       - name: Display run_id
         run: echo "Run ID:${{ github.run_id }}"
-  # 
+  
+      - name: Debug API URL
+        run: |
+            echo "API URL: https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+ 
       - name: Update GitHub Actions run name
         run: |
           curl -X PATCH \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -d "{\"name\": \"${{ env.release_name }}\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/runs/16046382014"
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -d "{\"name\": \"${{ env.release_name }}\"}" \
+          "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
 
       - name: Display release name
         run: echo "Release name is:${{ env.release_name }}"
