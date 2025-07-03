@@ -80,22 +80,6 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Rename workflow run dynamically
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_VERSION: ${{ env.new_version }}
-          RELEASE_TYPE: ${{ steps.release_type.outputs.release_type }}
-        run: |
-          RUN_ID=$(jq --raw-output .workflow_run.id < $GITHUB_EVENT_PATH || echo "$GITHUB_RUN_ID")
-          NEW_NAME="Release – ${NEW_VERSION} (${RELEASE_TYPE} release)"
-
-          echo "Setting workflow run name to: $NEW_NAME"
-
-          curl -X PATCH \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} \
-            -d "{\"name\":\"$NEW_NAME\"}"
 
     
 
