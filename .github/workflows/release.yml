@@ -1,4 +1,4 @@
-name: Release ${{ env.new_version }} (${{ steps.release_type.outputs.release_type }} release)
+name: Release Workflow
 
 on: push
  
@@ -24,7 +24,7 @@ jobs:
       - name: Get release type from PR labels
         id: release_type
         run: |
-          LABELS=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
+          # LABELS=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
           RELEASE_TYPE="patch"
           for label in $LABELS; do
             case "$label" in
@@ -82,6 +82,27 @@ jobs:
             - Automated release via GitHub Actions.
           draft: false
           prerelease: false
+
+
+      - name: Set dynamic release name
+        id: release_name
+        run: |
+          echo "release_name=Release ${{ env.new_version }} (${{ steps.release_type.outputs.release_type }} release)" >> $GITHUB_ENV
+
+      - name: Update GitHub Actions run name
+        run: |
+          curl -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{\"name\": \"${{ env.release_name }}\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Display release name
+        run: echo "Release name is:${{ env.release_name }}"
+
+      - name: Deploy 
+        run: |
+          echo "Deploying release ${{ env.new_version }} as a ${{ steps.release_type.outputs.release_type }} release"
+          # Your deployment commands here    
 
 
     
