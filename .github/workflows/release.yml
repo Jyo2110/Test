@@ -86,6 +86,20 @@ jobs:
       - name: Display run_id
         run: echo "Run ID:${{ github.run_id }}"
   # 
+      - name: Update GitHub Actions run name
+        run: |
+          curl -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{\"name\": \"${{ env.release_name }}\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/16046382014"
+
+      - name: Display release name
+        run: echo "Release name is:${{ env.release_name }}"
+
+      - name: Deploy
+        run: |
+          echo "Deploying release ${{ env.new_version }} as a ${{ steps.release_type.outputs.release_type }} release"
+          # Your deployment commands here
 
 
     
