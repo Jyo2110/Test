@@ -33,7 +33,7 @@ jobs:
           echo "🔖 Release type: $RELEASE_TYPE"
           echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
 
-      - name: Get current version
+      - name: Get current versions
         id: get_version
         run: |
           TAG=$(git tag -l | sort -V | tail -n 1)
