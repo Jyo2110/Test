@@ -1,4 +1,5 @@
-name: Versioning and Create GitHub Release
+run-name: Deploy ${{ github.ref_name }} to ${{ inputs.deploy_target }} by @${{ github.actor }}
+
 
 on:
   pull_request:
@@ -37,7 +38,7 @@ jobs:
         id: get_version
         run: |
           TAG=$(git tag -l | sort -V | tail -n 1)
-          if [ -z "$TAG" ]; then TAG="v0.2.0"; fi
+          if [ -z "$TAG" ]; then TAG="v0.4.0"; fi
 
           VERSION=${TAG#v}
           IFS='.' read -r -a PARTS <<< "$VERSION"
