@@ -1,9 +1,25 @@
-run-name: Deploy ${{ github.ref_name }} to ${{ inputs.deploy_target }} by @${{ github.actor }}
-
-
 on:
-  pull_request:
+ pull_request:
     types: [opened, labeled, synchronize] 
+workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version'
+        required: true
+      release_type:
+        description: 'Release type'
+        required: true
+
+run-name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
+
+
+
+# run-name: Deploy ${{ github.ref_name }} to ${{ inputs.deploy_target }} by @${{ github.actor }}
+
+
+# on:
+#   pull_request:
+#     types: [opened, labeled, synchronize] 
 
 jobs:
   create-release:
@@ -38,7 +54,7 @@ jobs:
         id: get_version
         run: |
           TAG=$(git tag -l | sort -V | tail -n 1)
-          if [ -z "$TAG" ]; then TAG="v0.4.0"; fi
+          if [ -z "$TAG" ]; then TAG="v2.1 .0"; fi
 
           VERSION=${TAG#v}
           IFS='.' read -r -a PARTS <<< "$VERSION"
