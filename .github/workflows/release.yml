@@ -1,16 +1,35 @@
+# on:
+#  pull_request:
+#     types: [opened, labeled, synchronize] 
+#  workflow_dispatch:
+#     inputs:
+#       release_version:
+#         description: 'Release version'
+#         required: true
+#       release_type:
+#         description: 'Release type'
+#         required: true
+
+
+
+# name: Release Workflow
+
 on:
- pull_request:
-    types: [opened, labeled, synchronize] 
- workflow_dispatch:
+  workflow_dispatch:
     inputs:
-      release_version:
+      new_version:
         description: 'Release version'
         required: true
+        default: 'v1.0.0'
       release_type:
         description: 'Release type'
         required: true
+        default: 'minor'
 
+
+        
 run-name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
+
 
 
 
