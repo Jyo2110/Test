@@ -1,52 +1,28 @@
-# name: Create Staging Release Tag
+name: Release Workflow
 
-# on:
-#   pull_request:
-#     branches:
-#       - staging
-#     types:
-#       - closed
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Version of the release'
+        required: true
+        default: '1.0.0'
+      release_type:
+        description: 'Type of release (e.g., Major, Minor, Patch)'
+        required: true
+        default: 'Major'
 
-# permissions:
-#   contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
 
-# jobs:
-#   create-staging-release-tag:
-#     # Only run if the PR was merged and originated from dev branch
-#     if: >
-#       github.event.pull_request.merged == true && 
-#       github.event.pull_request.base.ref == 'staging' && 
-#       github.event.pull_request.head.ref == 'dev'
-#     runs-on: ubuntu-latest
+    name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
     
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
-#       with:
-#         fetch-depth: 0
-#         # token: ${{ secrets.GITHUB_TOKEN }}
-    
-#     - name: Generate Staging Release Tag
-#       id: generate_tag
-#       shell: bash
-#       run: |
-#         # Generate tag with staging prefix and timestamp
-#         TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
-#         TAG="staging-release-${TIMESTAMP}"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
         
-#         echo "tag=${TAG}" >> $GITHUB_OUTPUT
-#         echo "Generated staging release tag: ${TAG}"
-    
-#     - name: Create Staging Release Tags
-#       env:
-#         # Ensure you're using a token with write permissions
-#          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#       run: |
-#         # Configure git user for tagging
-#         # git config user.name "github-actions[bot]"
-#         # git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        
-#         # Create and push annotated tag
-#         git tag -a ${{ steps.generate_tag.outputs.tag }} -m "Staging Release ${{ steps.generate_tag.outputs.tag }}"
-#         git push origin ${{ steps.generate_tag.outputs.tag }}
-
+      - name: Print release version and type
+        run: |
+          echo "Release Version: ${{ github.event.inputs.release_version }}"
+          echo "Release Type: ${{ github.event.inputs.release_type }}"
