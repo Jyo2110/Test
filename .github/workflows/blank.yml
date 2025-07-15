@@ -19,9 +19,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    
-    name: Release ${{ env.new_version }} (${{ steps.release_type.outputs.release_type }} release)
 
+    name: Release from ${{ steps.get_prev_version.outputs.prev_version }} (${{ github.event.inputs.release_type }} release)
+
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -46,7 +47,14 @@ jobs:
       #     echo "🔖 Release type: $RELEASE_TYPE"
       #     echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
 
+      - name: Get previous version tag
+        id: get_prev_version
+        run: |
+          TAG=$(git tag -l | sort -V | tail -n 1)
+          echo "Previous version tag: $TAG"
+          echo "prev_version=$TAG" >> $GITHUB_OUTPUT
 
+    
       - name: Get current versions
         id: get_version
         env:
