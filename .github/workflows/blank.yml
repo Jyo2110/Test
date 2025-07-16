@@ -22,7 +22,6 @@ jobs:
 
     name: Release from ${{ steps.get_prev_version.outputs.prev_version }} (${{ github.event.inputs.release_type }} release)
 
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
