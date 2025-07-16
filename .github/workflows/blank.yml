@@ -1,7 +1,6 @@
 name: Release Workflow
 
-# run-name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
-
+run-name: Release ${{ github.event.inputs.release_type }}
 on:
   workflow_dispatch:
     inputs:
@@ -20,7 +19,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
-    name: Release from ${{ steps.get_prev_version.outputs.prev_version }} (${{ github.event.inputs.release_type }} release)
+    # name: Release from ${{ steps.get_prev_version.outputs.prev_version }} (${{ github.event.inputs.release_type }} release)
 
     steps:
       - name: Checkout code
