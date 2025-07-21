@@ -1,5 +1,6 @@
 name: Release Workflow
 
+run-name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
 on:
   workflow_dispatch:
     inputs:
