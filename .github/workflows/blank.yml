@@ -1,25 +1,32 @@
-name: CI Build with Approval
+name: Build with Manual Approval
 
 on:
-  push:
-    branches:
-      - '**'  # All branches, including feature/*
-  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build:
+  request-approval:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Request Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: Jyo2110
+          minimum-approvals: 1
+          issue-title: "Approve Android and iOS Builds"
+          issue-body: "Please approve to start Android and iOS builds."
+          exclude-workflow-initiator-as-approver: false
 
-      - name: Run test
-        run: echo "Running tests..."
-
-  approval:
-    needs: build
+  android-build:
+    needs: request-approval
     runs-on: ubuntu-latest
-    environment: manual-approval
     steps:
-      - name: Awaiting manual approval
-        run: echo "Approved!"
+      - name: Build Android
+        run: echo "Building Android app..."
+
+  ios-build:
+    needs: request-approval
+    runs-on: macos-latest
+    steps:
+      - name: Build iOS
+        run: echo "Building iOS app..."
