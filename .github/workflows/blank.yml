@@ -6,6 +6,6 @@ on:
 jobs:
   test-build:
     runs-on: ubuntu-latest
-    environment: Build Approval
+    environment: manual-approval
     steps:
       - run: echo "Hello, this is a test build!"
