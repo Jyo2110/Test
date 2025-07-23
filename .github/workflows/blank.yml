@@ -1,29 +1,11 @@
-name: Release Workflow
+name: Test Build Approval
 
-run-name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
 on:
   workflow_dispatch:
-    inputs:
-      release_version:
-        description: 'Version of the release'
-        required: true
-        default: '1.0.0'
-      release_type:
-        description: 'Type of release (e.g., Major, Minor, Patch)'
-        required: true
-        default: 'Major'
 
 jobs:
-  release:
+  test-build:
     runs-on: ubuntu-latest
-
-    name: Release ${{ github.event.inputs.release_version }} (${{ github.event.inputs.release_type }} release)
-    
+    environment: Build Approval
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        
-      - name: Print release version and type
-        run: |
-          echo "Release Version: ${{ github.event.inputs.release_version }}"
-          echo "Release Type: ${{ github.event.inputs.release_type }}"
+      - run: echo "Hello, this is a test build!"
