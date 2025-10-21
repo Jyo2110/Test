@@ -1,4 +1,4 @@
-name: Build and Release 
+name: Mobile Release
 
 on:
   workflow_dispatch:
@@ -35,3 +35,18 @@ on:
         description: 'Build number for tracking'
         required: true
         default: '10'
+
+jobs:
+  echo-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print inputs
+        run: |
+          echo "Platform: ${{ github.event.inputs.platform }}"
+          echo "Build Type: ${{ github.event.inputs.buildType }}"
+          echo "Output Type: ${{ github.event.inputs.outputType }}"
+          echo "Runtime Environment: ${{ github.event.inputs.runtimeEnvironment }}"
+          echo "Version Number: ${{ github.event.inputs.versionNumber }}"
+          echo "Release Notes: ${{ github.event.inputs.releaseNotes }}"
+          echo "Tester Groups: ${{ github.event.inputs.testerGroups }}"
+          echo "Build Number: ${{ github.event.inputs.buildNumber }}"
