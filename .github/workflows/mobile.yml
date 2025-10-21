@@ -1,0 +1,37 @@
+name: Build and Release 
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Target platform(s), e.g., Android, iOS'
+        required: true
+        default: 'Android'
+      buildType:
+        description: 'Build type, e.g., apk, bundle'
+        required: true
+        default: 'bundle'
+      outputType:
+        description: 'Application ID or output type'
+        required: true
+        default: 'com.wynn.mobileapp'
+      runtimeEnvironment:
+        description: 'Runtime environment, e.g., Development, Staging'
+        required: true
+        default: 'Development'
+      versionNumber:
+        description: 'Version number for this build'
+        required: true
+        default: 'DevOps-Test-2.0'
+      releaseNotes:
+        description: 'Release notes for this build'
+        required: true
+        default: 'Test Release'
+      testerGroups:
+        description: 'Comma-separated tester groups'
+        required: true
+        default: 'dev-test'
+      buildNumber:
+        description: 'Build number for tracking'
+        required: true
+        default: '10'
